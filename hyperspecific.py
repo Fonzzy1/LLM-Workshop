@@ -20,29 +20,34 @@ import ollama  # Now we can use the ollama library's features in our code
 # - Use a named LLM model (such as 'llama2')
 # - Return the LLM's response as text
 
-def query_llm(prompt, model='qwen2.5:0.5b'):
+
+def query_llm(prompt, model="qwen2.5:0.5b"):
     """
     Given a 'prompt' and the name of a model,
     return the LLM's text response (uses ollama SDK).
     Because the model has a default, we don't need to be explicit in which model
-    to use if you don't want to. 
+    to use if you don't want to.
     """
     # Send the request to Ollama and get the response dictionary (a kind of
     # "named list").
-    response = ollama.chat(model=model, messages=[{'role': 'user',
-                                                        'content': prompt}])
+    response = ollama.chat(
+        model=model, messages=[{"role": "user", "content": prompt}]
+    )
     # Return ONLY the LLM's textual answer from the response.
     return response.message.content
+
 
 # --- Using (calling) a function ---
 # To use a function, write its name and provide any needed input ("arguments")
 # in parentheses.
 
 # Let's set up a question prompt for the LLM:
-my_prompt = "What is the state of the art method for computational framining analysis?"
+prompt = (
+    "What is the state of the art method for computational framining analysis?"
+)
 
 # Now, call our function with this prompt to get the LLM's answer:
-llm_answer = query_llm(my_prompt)
+llm_answer = query_llm(prompt)
 
 # Finally, print out the LLM's answer for everyone to see!
 print("Ollama LLM says:\n")
