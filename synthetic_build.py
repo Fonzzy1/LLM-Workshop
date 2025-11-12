@@ -51,7 +51,7 @@ for _ in range(100):
     sentence = query_label(prompt, label)
     generated_examples.append((label, sentence))
 
-with open("generated_examples.csv", "w", encoding="utf-8") as f:
+with open("generated_examples.csv", "w", encoding="utf-8", newline="") as f:
+    writer = csv.writer(f, quoting=csv.QUOTE_ALL)
     for label, sentence in generated_examples:
-        line = f'"{sentence.replace("\"", "\"\"")}",{label}\n'
-        f.write(line)
+        writer.writerow([sentence, label])
