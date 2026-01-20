@@ -1,0 +1,210 @@
+---
+jupyter: python3
+---
+
+<a href="https://colab.research.google.com/github/Fonzzy1/LLM-Workshop/blob/main/workshop.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+# LLMs for Communications Methods
+
+## Before you proceed
+
+Since by default the runtime type of Colab instance is CPU based, in order to use LLM models make sure to change your runtime type to T4 GPU (or better if you're a paid Colab user). This can be done by going to **Runtime > Change runtime type**.
+
+While running your script be mindful of the resources you're using. This can be tracked at **Runtime > View resources**.
+
+```{python}
+!sudo apt update
+!sudo apt install -y pciutils zstd
+!curl -fsSL https://ollama.com/install.sh | sh
+!pip install ollama kagglehub kagglehub[pandas-datasets]
+# Fancy little subprocess trick to get ollama working in colab books
+import subprocess
+proccess = subprocess.Popen(['ollama', 'serve'], stdout=subprocess.DEVNULL,
+stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, close_fds=True)
+
+```
+
+## Pulling Models
+
+We are going to be using a few models today: Lamma, Qwen, Gemma and Deepseek.  
+All of these models are open source, and all but Gemma are the same size.  
+However, they will exhibit slight differences when we ask them the same
+question.
+
+For other models check https://ollama.com/library
+
+```{python}
+!ollama pull llama3.1:8b
+!ollama pull qwen3:8b
+!ollama pull gemma3:4b
+!ollama pull deepseek-r1:8b
+```
+
+## Interacting with LLMS in python
+
+Unlike interacting with a chat client online, using LLMs in python is much more
+flexible but takes a little more time to set up.
+
+In python we can make functions - repeatable peices of code using the `def`
+syntax. We can give these fucntions arguments which we then use to change how it
+behaves. 
+
+Below, there is a function that takes a prompt and the name of the model we want
+to use and then gives back the response from the model 
+
+```{python}
+import ollama
+
+def query_llm(prompt, model):
+    """
+    Given a 'prompt' and the name of a model,
+    return the LLM's text response (uses ollama SDK).
+    Because the model has a default, we don't need to be explicit in which model
+    to use if you don't want to.
+    """
+    # Send the request to Ollama and get the response dictionary (a kind of
+    # "named list").
+    response = ollama.chat(
+        model=model, messages=[{"role": "user", "content": prompt}]
+    )
+    # Return ONLY the LLM's textual answer from the response.
+    return response.message.content
+```
+
+Now that we have a function, we can look at some responses from the different
+models.
+
+Change the question in the cell below to something that is within your field of
+expertise.
+
+```{python}
+question = 'What is the role of performance in australian parliamentary debates'
+
+```
+
+We can now go and ask what each model says in response using the function that
+was defined above.
+
+
+```{python}
+
+for model in [ 'llama3.1:8b', 'qwen3:8b', 'gemma3:4b', 'deepseek-r1:8b']:
+    answer = query_llm(question, model)
+    print(f'{model} says:\n{answer}\n')
+
+```
+
+What did the model get right, what did the model get wrong? How did the response
+differ between the different models. If you want, try playing with a couple of
+different questions or different ways of wording the questions to see if you get
+different results.
+
+## How language models are used in communications research
+
+While we can use language models for question-answering tasks, as we did before,
+they are much more useful for the busy work of research. If we think of language
+models as cheap and fast RAs, we can start offloading some of the annoying tasks
+-- labelling, data cleaning, entity extraction, etc. -- to them and open up our
+work to much larger datasets and bigger questions than we would have been able
+to approach before.
+
+
+### Narrative Framing -- Hero Villan Extraction
+
+In this demo, we're going to expand on the work done by [Frermann et al.
+(2023)](https://doi.org/10.18653/v1/2023.acl-long.486), which looks at how
+narrative actors -- Heroes, Victims and Villains -- are allocated within climate
+discourse.
+
+#### Dataset Selection
+
+Dataset selection is one of the most important parts of computational
+communications tasks as it defines the scope of questions that can be answered
+by your later analysis.
+
+We are using a pre-built dataset from
+[Kaggle](https://www.kaggle.com/datasets/edqian/twitter-climate-change-sentiment-dataset), which we do because it is easy to access.
+
+In this dataset, we have tweets, with their sentiment towards climate change
+labeled as so:
+- 2 (News): the tweet links to factual news about climate change  
+- 1 (Pro): the tweet supports the belief of man-made climate change  
+- 0 (Neutral): the tweet neither supports nor refutes the belief of man-made
+  climate change  
+- -1 (Anti): the tweet does not believe in man-made climate change
+
+```{python}
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
+# Set the path to the file you'd like to load
+file_path = "twitter_sentiment_data.csv"
+
+# Load the latest version
+df = kagglehub.load_dataset(
+  KaggleDatasetAdapter.PANDAS,
+  "edqian/twitter-climate-change-sentiment-dataset",
+  file_path,
+)
+
+```
+
+Now we can see the first few records and how the sentiment is distribuited
+```{python}
+print("First 5 records:\n", df.head())
+
+print("Sentiment Distribuiton")
+print(df['sentiment'].value_counts())
+```
+
+#### Preprocessing and Cleaning
+
+@Laura Have a go here
+
+
+#### Building the infrustructure
+
+While we have the data and the models, we need the code to make them interact
+with each other. So, before we start writing prompts, we need to have a look at
+how we can make the LLM interact with the data in a clean and reproducible way.
+
+The first thing to do is build a response format. Think of this as the form that
+the LLM will fill out when we ask it to look at tweet. In our example, we are
+asking the LLM to identify the hero, the villan and the victim in the tweet, so
+our response format will look something like this:
+
+```{python}
+from pydantic import BaseModel
+from typing import Optional
+
+class ResponseFormat(BaseModel):
+    hero: Optional[str]
+    victim: Optional[str]
+    villain: Optional[str]
+```
+
+The second thing we need is a new function that can use this response format and
+the feed the data to the model.
+
+```{python}
+
+def transform_data(df, prompt, model, response_format):
+    cols = response_format.__fields__.keys()
+    for col in cols:
+        df[col] = None
+
+    for idx, row in df.iterrows():
+        response = ollama.chat(
+            model=model,
+            messages=[{'role': 'system', 'content': prompt}, {'role': 'user',
+            'content': row['message']}],
+            format=response_format.model_json_schema(),
+        )
+        parsed_response =
+        response_format.model_validate_json(response.message.content)
+        for col in cols:
+            df.at[idx, col] = getattr(parsed_response, col)
+    return df
+
+```
+
