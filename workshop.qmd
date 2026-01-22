@@ -1,56 +1,107 @@
 ---
 jupyter: python3
+cache: True
+
 ---
 
 <a href="https://colab.research.google.com/github/Fonzzy1/LLM-Workshop/blob/main/workshop.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-# LLMs for Communications Methods
+# **LLMs for Communications Methods**
+##### Presented at the ADM+S 2026 Summer School as the interactive component of
+# **Integrating LLMs into communication research methods: Possibilities, assumptions and risks**
 
-## Before you proceed
 
-Since by default the runtime type of Colab instance is CPU based, in order to use LLM models make sure to change your runtime type to T4 GPU (or better if you're a paid Colab user). This can be done by going to **Runtime > Change runtime type**.
+This session will provide users with a hands-on opportunity to see how language models can be integrated into communications research, and what possibilities and risks this presents.
 
-While running your script be mindful of the resources you're using. This can be tracked at **Runtime > View resources**.
+<br>
+
+*Authors: Alfie Chadwick and Laura Vodden*
+
+<br>
+
+# **Part 1. Setting up**
+
+### **1.1 Housekeeping**
+
+**Before you proceed**
+
+The default runtime type of Colab instances is CPU based. We will need to change our runtime type to **T4 GPU** or better.
+Change this by either going to **Runtime > Change runtime type**
+
+*or*
+
+by going to the tiny arrow in the top right corner of your browser and selecting ***Change runtime type**.
+
+![image.png](data:image/png;base64,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)
+
+While running your script be mindful of the resources you're using. This can be tracked in the same menu at **View resources**.
+
+Source [here](https://colab.research.google.com/github/5aharsh/collama/blob/main/Ollama_Setup.ipynb#scrollTo=o2ghppmRDFny).
+
+### **1.2 Set up ollama environment, and install and import libraries**
+This should only take a minute or two.
 
 ```{python}
-!sudo apt update
-!sudo apt install -y pciutils zstd
-!curl -fsSL https://ollama.com/install.sh | sh
+#| colab: {base_uri: https://localhost:8080/}
+#!sudo apt update
+#!sudo apt install -y pciutils zstd
+#!curl -fsSL https://ollama.com/install.sh | sh
 !pip install ollama kagglehub kagglehub[pandas-datasets]
-# Fancy little subprocess trick to get ollama working in colab books
+
+# Fancy little subprocess trick to get ollama working in Colab workbooks
 import subprocess
 proccess = subprocess.Popen(['ollama', 'serve'], stdout=subprocess.DEVNULL,
 stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, close_fds=True)
-
 ```
 
-## Pulling Models
+### **1.3 Model selection**
 
-We are going to be using a few models today: Lamma, Qwen, Gemma and Deepseek.  
-All of these models are open source, and all but Gemma are the same size.  
+We are going to be using **four** Large Language Models today:
+* Llama
+* Qwen
+* Gemma
+* Deepseek
+
+
+
+All of these models are **open source**, and all but Gemma are the same size.  
 However, they will exhibit slight differences when we ask them the same
 question.
 
 For other models check https://ollama.com/library
 
+<br>
+
+
+> 🏃 **Run the cell below** to 'pull' our models from the ollama library. This could take up to 3 minutes.
+
 ```{python}
+#| colab: {base_uri: https://localhost:8080/}
 !ollama pull llama3.1:8b
 !ollama pull qwen3:8b
 !ollama pull gemma3:4b
 !ollama pull deepseek-r1:8b
+
+print('Done!')
 ```
 
-## Interacting with LLMS in python
+<br>
 
-Unlike interacting with a chat client online, using LLMs in python is much more
-flexible but takes a little more time to set up.
+# **Part 2. Interacting with LLMs in Python**
 
-In python we can make functions - repeatable peices of code using the `def`
-syntax. We can give these fucntions arguments which we then use to change how it
-behaves. 
+Unlike interacting with a chat client online, using LLMs in Python is much more
+flexible but takes a little time to set up.
 
-Below, there is a function that takes a prompt and the name of the model we want
-to use and then gives back the response from the model 
+In Python we can create **functions** - repeatable pieces of code using the `def`
+syntax. We can pass **arguments** to these functions, which change how the function behaves.
+
+Below is a function that takes two arguments:
+    1.a **prompt**; and
+    2.the name of the **model** we want to use
+
+<br>
+
+> 🏃 **Run the cell below** to **define** the **function**. We will **call** this function later.
 
 ```{python}
 import ollama
@@ -62,78 +113,108 @@ def query_llm(prompt, model):
     Because the model has a default, we don't need to be explicit in which model
     to use if you don't want to.
     """
-    # Send the request to Ollama and get the response dictionary (a kind of
-    # "named list").
+    # Send the request to Ollama and get the response
     response = ollama.chat(
         model=model, messages=[{"role": "user", "content": prompt}]
     )
-    # Return ONLY the LLM's textual answer from the response.
+    # Return ONLY the LLM's textual answer from the response
     return response.message.content
 ```
 
-Now that we have a function, we can look at some responses from the different
+Now that we have **defined** a working **function**, we can look at some responses from the different
 models.
 
-Change the question in the cell below to something that is within your field of
-expertise.
+<br>
+
+> ✍ Change the **prompt** in the cell below to something that is within your field of expertise - but try to ask for a brief response.
 
 ```{python}
-question = 'What is the role of performance in australian parliamentary debates'
-
+# Examples (ctrl+/ to use):
+# prompt = 'What is the role of performance in australian parliamentary debates'
+# prompt = 'Briefly tell me: What does a cat say?'
+prompt = 'What is the definition of framing in communication science?'
 ```
 
 We can now go and ask what each model says in response using the function that
 was defined above.
 
+<br>
+
+
+> 🏃 **Run the cell below** to **call** the function. The function **returns** a **response**, based on these arguments.
 
 ```{python}
-
-for model in [ 'llama3.1:8b', 'qwen3:8b', 'gemma3:4b', 'deepseek-r1:8b']:
-    answer = query_llm(question, model)
+#| colab: {base_uri: https://localhost:8080/}
+for model in ['llama3.1:8b', 'qwen3:8b', 'gemma3:4b', 'deepseek-r1:8b']:
+    print(f'{model} is analysing your question...\n')
+    print("-" * 10)
+    answer = query_llm(prompt, model)
     print(f'{model} says:\n{answer}\n')
-
+    print("-" * 100)
 ```
 
-What did the model get right, what did the model get wrong? How did the response
-differ between the different models. If you want, try playing with a couple of
+### **🧐 Questions**
+
+
+> *  What did the models get **right**, and what did they get **wrong**?
+> *  How did the response **differ** between the different models?
+> *  Which model gave the 'best' response, and **why** do you think that?
+> *  Is this kind of output **useful**?
+
+
+Try playing with a couple of
 different questions or different ways of wording the questions to see if you get
 different results.
 
-## How language models are used in communications research
+<br>
 
-While we can use language models for question-answering tasks, as we did before,
-they are much more useful for the busy work of research. If we think of language
-models as cheap and fast RAs, we can start offloading some of the annoying tasks
--- labelling, data cleaning, entity extraction, etc. -- to them and open up our
-work to much larger datasets and bigger questions than we would have been able
-to approach before.
+# **Part 3. Using LLMs for communication research**
+
+While we can use LLMs for question-answering tasks, as we did before, they are particularly for the **'busy work'** of research.
 
 
-### Narrative Framing -- Hero Villan Extraction
+Tasks such as data **cleaning**, **labelling**, **classification** and **extraction** are relatively straightforward to automate and **validate**. By automating such processes, we can work with much larger datasets and address research questions at a different scale than would typically be feasible using manual methods.
+
+
+While these approaches enable new analytical **possibilities**, they also introduce **risks** that warrant careful consideration. We will keep this in mind as we work through the following examples.
+
+
+
+
+
+
+### **☝ Example: Narrative framing: Hero/villain extraction**
 
 In this demo, we're going to expand on the work done by [Frermann et al.
 (2023)](https://doi.org/10.18653/v1/2023.acl-long.486), which looks at how
-narrative actors -- Heroes, Victims and Villains -- are allocated within climate
+**narrative actors** - in this case, heroes, victims and villains - are allocated within climate
 discourse.
 
-#### Dataset Selection
+### **3.1 Dataset selection**
 
 Dataset selection is one of the most important parts of computational
 communications tasks as it defines the scope of questions that can be answered
 by your later analysis.
 
-We are using a pre-built dataset from
-[Kaggle](https://www.kaggle.com/datasets/edqian/twitter-climate-change-sentiment-dataset), which we do because it is easy to access.
+Today, we are using pre-built **Twitter Climate Change Sentiment** dataset  from
+[Kaggle](https://www.kaggle.com/datasets/edqian/twitter-climate-change-sentiment-dataset), for ease of access.
 
-In this dataset, we have tweets, with their sentiment towards climate change
-labeled as so:
-- 2 (News): the tweet links to factual news about climate change  
-- 1 (Pro): the tweet supports the belief of man-made climate change  
-- 0 (Neutral): the tweet neither supports nor refutes the belief of man-made
+This dataset contains a sample of **tweets**, with their **sentiment** towards climate change
+labeled as follows:
+
+
+- **2 (News):** the tweet links to factual news about climate change  
+- **1 (Pro):** the tweet supports the belief of anthropogenic climate change  
+- **0 (Neutral):** the tweet neither supports nor refutes the belief of anthropogenic
   climate change  
-- -1 (Anti): the tweet does not believe in man-made climate change
+- -**1 (Anti):** the tweet does not believe in anthropogenic climate change
+
+<br>
+
+> 🏃 **Run the cell below** to import the dataset and view the first five records.
 
 ```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 293}
 import kagglehub
 from kagglehub import KaggleDatasetAdapter
 
@@ -147,22 +228,62 @@ df = kagglehub.load_dataset(
   file_path,
 )
 
+print("First 5 records:\n")
+df.head()
 ```
 
-Now we can see the first few records and how the sentiment is distribuited
+Now we can see the first few records and how the sentiment is distribuited.
+
+<br>
+
+> 🏃 **Run the cell below** to view the distribution of labels.
+
 ```{python}
-print("First 5 records:\n", df.head())
+#| colab: {base_uri: https://localhost:8080/, height: 525}
+sentiment_map = {
+    2: "news",
+    1: "pro",
+    0: "neutral",
+    -1: "anti"
+}
 
-print("Sentiment Distribuiton")
-print(df['sentiment'].value_counts())
+df["sentiment_text"] = df["sentiment"].map(sentiment_map)
+
+df['sentiment_text'].value_counts().plot(title='Label distribution', kind='bar', color=['green', 'blue', 'gray', 'orange'])
 ```
 
-#### Preprocessing and Cleaning
+### **3.2 Data preprocessing and cleaning**
 
-@Laura Have a go here
+We will be dropping URLs, retweet prefixes, and non-ASCII characters to reduce platform-specific noise and standardise the text for analysis...
+
+- TBC @Laura todo
 
 
-#### Building the infrustructure
+> 🏃 **Run the cell below** to clean the tweets and view the cleaned text in our dataframe.
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 206}
+# remove urls
+df['clean_message'] = df['message'].str.replace(r'http\S+|www\S+', '', regex=True)
+
+# remove handle after 'RT @'
+df['clean_message'] = df['clean_message'].str.replace(r'^RT\s+@\w+:\s*', '', regex=True)
+
+# drop ascii characters
+df['clean_message'] = df['clean_message'].str.encode('ascii', 'ignore').str.decode('ascii')
+
+df[['message', 'clean_message']].head()
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 206}
+# for testing -  take a sample
+
+df_samp = df.sample(n=25)
+df_samp.head()
+```
+
+### **3.3 Building the infrustructure**
 
 While we have the data and the models, we need the code to make them interact
 with each other. So, before we start writing prompts, we need to have a look at
@@ -170,41 +291,216 @@ how we can make the LLM interact with the data in a clean and reproducible way.
 
 The first thing to do is build a response format. Think of this as the form that
 the LLM will fill out when we ask it to look at tweet. In our example, we are
-asking the LLM to identify the hero, the villan and the victim in the tweet, so
+asking the LLM to identify the **hero**, the **villain** and the **victim** in each tweet, so
 our response format will look something like this:
+
+<br>
+
+> 🏃 **Run the cell below** to define our **response format**.
 
 ```{python}
 from pydantic import BaseModel
 from typing import Optional
 
 class ResponseFormat(BaseModel):
-    hero: Optional[str]
-    victim: Optional[str]
-    villain: Optional[str]
+    hero: Optional[str] = None
+    victim: Optional[str] = None
+    villain: Optional[str] = None
 ```
 
-The second thing we need is a new function that can use this response format and
-the feed the data to the model.
+The second thing we need is a new **function** that can use this response format and feed the data to the model.
+
+<br>
+
+> 🏃 **Run the cell below** to define our new function.
 
 ```{python}
+from tqdm import tqdm
 
-def transform_data(df, prompt, model, response_format):
+def transform_data(df, model, response_format, prompt, think = False):
     cols = response_format.__fields__.keys()
     for col in cols:
         df[col] = None
+    if think:
+        df['reasoning'] = None
 
-    for idx, row in df.iterrows():
+    for idx, row in tqdm(df.iterrows()):
         response = ollama.chat(
             model=model,
             messages=[{'role': 'system', 'content': prompt}, {'role': 'user',
-            'content': row['message']}],
+            'content': row['clean_message']}],
             format=response_format.model_json_schema(),
+            think = think
         )
-        parsed_response =
-        response_format.model_validate_json(response.message.content)
+        parsed_response = response_format.model_validate_json(response.message.content)
         for col in cols:
             df.at[idx, col] = getattr(parsed_response, col)
-    return df
+            df.at[idx, 'reasoning'] = response.message.thinking
 
+    return df
 ```
+
+
+# **Part 4. Prompt engineering**
+
+### **4.1 Zero-shot prompting**
+
+```{python}
+prompt_zeroshot = '''
+You are a helpful research assistant, interested in the framing of narratives in tweets about climate change. You have been tasked with identifying the heroes, villains and victims in a selection of tweets.
+Task: Read each tweet and decide if there is a hero, a villain or a victim, as per the following criteria:
+
+Hero: an entity contributing to/responsible for issue resolution
+Villain: an entity contributing to/responsible for issue cause
+Victim: an entity suffering the consequences of an issue
+
+Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
+'''
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 1000}
+model= 'llama3.1:8b'
+response_format = ResponseFormat()
+response_df = transform_data(df_samp, model, response_format, prompt=prompt_zeroshot)
+
+response_df
+```
+
+
+### **4.2 Few-shot prompting**
+
+```{python}
+prompt_fewshot = '''
+You are a helpful research assistant, interested in the framing of narratives in tweets about climate change. You have been tasked with identifying the heroes, villains and victims in a selection of tweets.
+Task: Read each tweet and decide if there is a hero, a villain or a victim, as per the following criteria:
+
+Hero: an entity contributing to/responsible for issue resolution
+Villain: an entity contributing to/responsible for issue cause
+Victim: an entity suffering the consequences of an issue
+
+Examples:
+1. Theresa May's new chief of staff, Gavin Barwell, is known for his knowledgable concern about climate change
+    hero: Gavin Barwell
+    victim: None
+    villain: None
+
+2. The reality of climate change impacts everyone but the truth is that poor communities suffer most...perpetuating the injustice
+    hero: None
+    victim: poor communities
+    villain: None
+
+3. Anti-Trump actor fights global warming, but wont give up 14 homes and private jet
+    hero: Anti-Trump actor
+    victim: None
+    villain: None
+
+Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
+'''
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 1393}
+response_df = transform_data(df_samp, model, response_format, prompt=prompt_fewshot)
+
+response_df
+```
+
+### **4.3 Chain-of-thought reasoning**
+
+
+```{python}
+prompt_cot = '''
+You are a helpful research assistant, interested in the framing of narratives in tweets about climate change. You have been tasked with identifying the heroes, villains and victims in a selection of tweets.
+Task:
+Read each tweet and decide if there is a hero, a villain or a victim, as per the following criteria:
+
+Hero: an entity contributing to/responsible for issue resolution
+Villain: an entity contributing to/responsible for issue cause
+Victim: an entity suffering the consequences of an issue
+
+Chain of thought:
+1. Identify the central issue: Determine what climate-related problem or event the tweet is discussing.
+2. Look for conflict or tension: Check if the tweet highlights a problem, blame, praise, or action.
+3. Detect heroes: Identify entities praised for mitigating or solving the issue.
+4. Detect victims: Identify entities suffering negative consequences of the issue.
+5. Detect villains: Identify entities blamed for causing or worsening the issue.
+
+Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
+'''
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 1000}
+response_format = ResponseFormat()
+response_df = transform_data(df_samp, model, response_format, prompt=prompt_cot, think = True)
+
+response_df
+```
+
+### 4.4 **Classifying our Roles**
+
+```{python}
+
+
+from typing import Literal
+
+ActorType = Literal[
+    "ENVIRONMENT",
+    "CLIMATECHANGE",
+    "ENVIROMENTAL_ACTIVISTS",
+    "GENERAL_PUBLIC",
+    "GOVERNMENTS_AND_POLITICIANS",
+    "GREEN_TECHNOLOGY",
+    "INDUSTRY",
+    "EMISSIONS",
+    "LEGISLATION_AND_POLICY",
+    "MEDIA",
+    "SCIENCE_AND_EXPERTS",
+]
+class ClassificationResponseFormat(BaseModel):
+    hero: Optional[str] = None
+    hero_type: Optional[ActorType] = None
+    victim: Optional[str] = None
+    victim_type: Optional[ActorType] = None
+    villain: Optional[str] = None
+    villan_type: Optional[ActorType] = None
+```
+
+
+
+```{python}
+prompt_cot = '''
+You are a helpful research assistant, interested in the framing of narratives in tweets about climate change. You have been tasked with identifying the heroes, villains and victims in a selection of tweets.
+Task:
+Read each tweet and decide if there is a hero, a villain or a victim, as per the following criteria:
+
+Hero: an entity contributing to/responsible for issue resolution
+Villain: an entity contributing to/responsible for issue cause
+Victim: an entity suffering the consequences of an issue
+
+Chain of thought:
+1. Identify the central issue: Determine what climate-related problem or event the tweet is discussing.
+2. Look for conflict or tension: Check if the tweet highlights a problem, blame, praise, or action.
+3. Detect heroes: Identify entities praised for mitigating or solving the issue.
+4. Detect victims: Identify entities suffering negative consequences of the issue.
+5. Detect villains: Identify entities blamed for causing or worsening the issue.
+6. Identify Roles: For any identified actors, assign them one of the available types to the best of your ability
+
+Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
+'''
+```
+
+```{python}
+#| colab: {base_uri: https://localhost:8080/, height: 1000}
+model = 'deepseek-r1:8b'
+response_format = ResponseFormat()
+response_df = transform_data(df_samp, model, response_format, prompt=prompt_cot, think = True)
+
+response_df
+```
+
+
+# **Part 5. Comparison**
+
 
