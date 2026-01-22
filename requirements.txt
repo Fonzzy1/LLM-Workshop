@@ -1,2 +1,6 @@
-ollama==0.6.0
-pypdf2
+ollama
+kagglehub
+kagglehub[pandas-datasets]
+jupyter-cache
+matplotlib
+pandas

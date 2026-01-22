@@ -1,6 +1,7 @@
 ---
+execute: 
+  cache: true
 jupyter: python3
-cache: True
 
 ---
 
@@ -43,15 +44,18 @@ This should only take a minute or two.
 
 ```{python}
 #| colab: {base_uri: https://localhost:8080/}
-#!sudo apt update
-#!sudo apt install -y pciutils zstd
-#!curl -fsSL https://ollama.com/install.sh | sh
-!pip install ollama kagglehub kagglehub[pandas-datasets]
+#| eval: False
+!sudo apt update
+!sudo apt install -y pciutils zstd
+!curl -fsSL https://ollama.com/install.sh | sh
+!pip install ollama kagglehub kagglehub[pandas-datasets] pandas
 
 # Fancy little subprocess trick to get ollama working in Colab workbooks
 import subprocess
-proccess = subprocess.Popen(['ollama', 'serve'], stdout=subprocess.DEVNULL,
-stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, close_fds=True)
+proccess = subprocess.Popen(['ollama', 'serve'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL, close_fds=True)
+
+import pandas as pd
+pd.set_option('display.max_colwidth', None)
 ```
 
 ### **1.3 Model selection**
@@ -76,6 +80,7 @@ For other models check https://ollama.com/library
 > 🏃 **Run the cell below** to 'pull' our models from the ollama library. This could take up to 3 minutes.
 
 ```{python}
+#| eval: False
 #| colab: {base_uri: https://localhost:8080/}
 !ollama pull llama3.1:8b
 !ollama pull qwen3:8b
@@ -196,7 +201,7 @@ Dataset selection is one of the most important parts of computational
 communications tasks as it defines the scope of questions that can be answered
 by your later analysis.
 
-Today, we are using pre-built **Twitter Climate Change Sentiment** dataset  from
+Today, we are using pre-built **Twitter Climate Change Sentiment** dataset from
 [Kaggle](https://www.kaggle.com/datasets/edqian/twitter-climate-change-sentiment-dataset), for ease of access.
 
 This dataset contains a sample of **tweets**, with their **sentiment** towards climate change
@@ -279,8 +284,8 @@ df[['message', 'clean_message']].head()
 #| colab: {base_uri: https://localhost:8080/, height: 206}
 # for testing -  take a sample
 
-df_samp = df.sample(n=25)
-df_samp.head()
+df_samp = df.sample(n=25, random_state=67)
+df_samp
 ```
 
 ### **3.3 Building the infrustructure**
@@ -335,6 +340,7 @@ def transform_data(df, model, response_format, prompt, think = False):
         parsed_response = response_format.model_validate_json(response.message.content)
         for col in cols:
             df.at[idx, col] = getattr(parsed_response, col)
+        if think:
             df.at[idx, 'reasoning'] = response.message.thinking
 
     return df
@@ -342,6 +348,16 @@ def transform_data(df, model, response_format, prompt, think = False):
 
 
 # **Part 4. Prompt engineering**
+
+### **4.0 Model Selection**
+
+```{python}
+
+import random
+models = ['llama3.1:8b', 'qwen3:8b', 'gemma3:4b', 'deepseek-r1:8b']
+model = random.choice(models)
+print("Using model:", model)
+```
 
 ### **4.1 Zero-shot prompting**
 
@@ -364,7 +380,7 @@ model= 'llama3.1:8b'
 response_format = ResponseFormat()
 response_df = transform_data(df_samp, model, response_format, prompt=prompt_zeroshot)
 
-response_df
+print(response_df[['clean_message', 'hero', 'villain', 'victim']])
 ```
 
 
@@ -388,12 +404,12 @@ Examples:
 2. The reality of climate change impacts everyone but the truth is that poor communities suffer most...perpetuating the injustice
     hero: None
     victim: poor communities
-    villain: None
+    villain: climate change
 
 3. Anti-Trump actor fights global warming, but wont give up 14 homes and private jet
     hero: Anti-Trump actor
     victim: None
-    villain: None
+    villain: Anti-Trump actor
 
 Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
 '''
@@ -403,7 +419,7 @@ Extract from the text the names of entities (people, groups, organisations) that
 #| colab: {base_uri: https://localhost:8080/, height: 1393}
 response_df = transform_data(df_samp, model, response_format, prompt=prompt_fewshot)
 
-response_df
+print(response_df[['clean_message', 'hero', 'villain', 'victim']])
 ```
 
 ### **4.3 Chain-of-thought reasoning**
@@ -419,6 +435,22 @@ Hero: an entity contributing to/responsible for issue resolution
 Villain: an entity contributing to/responsible for issue cause
 Victim: an entity suffering the consequences of an issue
 
+Examples:
+1. Theresa May's new chief of staff, Gavin Barwell, is known for his knowledgable concern about climate change
+    hero: Gavin Barwell
+    victim: None
+    villain: None
+
+2. The reality of climate change impacts everyone but the truth is that poor communities suffer most...perpetuating the injustice
+    hero: None
+    victim: poor communities
+    villain: climate change
+
+3. Anti-Trump actor fights global warming, but wont give up 14 homes and private jet
+    hero: Anti-Trump actor
+    victim: None
+    villain: Anti-Trump actor
+
 Chain of thought:
 1. Identify the central issue: Determine what climate-related problem or event the tweet is discussing.
 2. Look for conflict or tension: Check if the tweet highlights a problem, blame, praise, or action.
@@ -432,10 +464,11 @@ Extract from the text the names of entities (people, groups, organisations) that
 
 ```{python}
 #| colab: {base_uri: https://localhost:8080/, height: 1000}
+thinking_model = 'deepseek-r1:8b'
 response_format = ResponseFormat()
-response_df = transform_data(df_samp, model, response_format, prompt=prompt_cot, think = True)
+response_df = transform_data(df_samp, thinking_model, response_format, prompt=prompt_cot, think = True)
 
-response_df
+print(response_df[['clean_message', 'hero', 'villain', 'victim', 'reasoning']])
 ```
 
 ### 4.4 **Classifying our Roles**
@@ -464,7 +497,7 @@ class ClassificationResponseFormat(BaseModel):
     victim: Optional[str] = None
     victim_type: Optional[ActorType] = None
     villain: Optional[str] = None
-    villan_type: Optional[ActorType] = None
+    villain_type: Optional[ActorType] = None
 ```
 
 
@@ -485,7 +518,24 @@ Chain of thought:
 3. Detect heroes: Identify entities praised for mitigating or solving the issue.
 4. Detect victims: Identify entities suffering negative consequences of the issue.
 5. Detect villains: Identify entities blamed for causing or worsening the issue.
-6. Identify Roles: For any identified actors, assign them one of the available types to the best of your ability
+6. Identify Roles: For any identified actors, assign them one of the available types to the best of your ability. Only assing roles if you have identified an actor
+
+Examples:
+1. Theresa May's new chief of staff, Gavin Barwell, is known for his knowledgable concern about climate change
+    hero: Gavin Barwell
+    hero_type: "GOVERNMENTS_AND_POLITICIANS",
+
+1. The reality of climate change impacts everyone but the truth is that poor communities suffer most...perpetuating the injustice
+    victim: poor communities
+    hero_type: "GENERAL_PUBLIC"
+    villain: Climate Change
+    villain_type: "CLIMATE_CHANGE"
+
+1. Anti-Trump actor fights global warming, but wont give up 14 homes and private jet
+    hero: Anti-Trump actor
+    hero_type: "ENVIROMENTAL_ACTIVISTS"
+    villain: Anti-Trump actor
+    villain_type: "ENVIROMENTAL_ACTIVISTS"
 
 Extract from the text the names of entities (people, groups, organisations) that are explicitly framed as either heroes, victims or villains. Do not make your own interpretations. If there is no hero, villain, or victim, respond with 'none'.
 '''
@@ -493,14 +543,23 @@ Extract from the text the names of entities (people, groups, organisations) that
 
 ```{python}
 #| colab: {base_uri: https://localhost:8080/, height: 1000}
-model = 'deepseek-r1:8b'
-response_format = ResponseFormat()
-response_df = transform_data(df_samp, model, response_format, prompt=prompt_cot, think = True)
+response_format = ClassificationResponseFormat()
+response_df = transform_data(df_samp, model, response_format, prompt=prompt_cot, think = model == thinking_model)
 
-response_df
+print(response_df[['clean_message', 'hero', 'villain', 'victim', 'hero_type', 'villain_type', 'victim_type']])
 ```
 
 
 # **Part 5. Comparison**
+
+In groups, let's see how the responses differed
+
+- If you had the same models, did they respond the same?
+- If there were different models, did you see any changes between your responses?
+- If you changed the prompts, how did this change the responses?
+
+
+
+# Part 6. Quantitative Work
 
 
