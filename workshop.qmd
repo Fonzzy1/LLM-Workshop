@@ -521,7 +521,8 @@ Chain of thought:
 6. Identify Roles: For any identified actors, assign them one of the available types to the best of your ability. Only assing roles if you have identified an actor. Any identified actor will have an allocated type
 
 Actor Types:
-    "ENVIRONMENT": The natural world including ecosystems, wildlife, and natural resources.
+    "ENVIRONMENT": The natural world including ecosystems, wildlife, and natural
+    resources.
     "CLIMATE_CHANGE": Long-term changes in temperature, precipitation, and weather patterns caused by human activities.
     "ENVIRONMENTAL_ACTIVISTS": Individuals or groups advocating for environmental protection and sustainability.
     "GENERAL_PUBLIC": The broad populations, communities, or individuals affected by or involved in environmental issues.
@@ -532,6 +533,7 @@ Actor Types:
     "LEGISLATION_AND_POLICY": Laws, regulations, and guidelines designed to manage environmental and climate-related issues.
     "MEDIA": Channels and platforms that disseminate information and shape public opinion on environmental topics.
     "SCIENCE_AND_EXPERTS": Researchers and professionals providing knowledge, data, and analysis on environmental and climate matters.
+
 
 Examples:
 1. Theresa May's new chief of staff, Gavin Barwell, is known for his knowledgable concern about climate change
